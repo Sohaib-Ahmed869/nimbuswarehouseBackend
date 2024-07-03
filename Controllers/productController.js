@@ -188,7 +188,131 @@ exports.getTotalSales = async (req, res) => {
     logs.forEach((log) => {
       total += log.total;
     });
-    res.status(200).json({totalSales: total});
+    res.status(200).json({ totalSales: total });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+//get some satistics like average per client, sales this month, sales this year, sales today
+exports.getStatistics = async (req, res) => {
+  try {
+    const logs = await OutboundStockLog.find();
+    let total = 0;
+    let clients = {};
+    let today = new Date();
+    let thisMonth = today.getMonth();
+
+    let thisYear = today.getFullYear();
+    let salesToday = 0;
+    let salesThisMonth = 0;
+    let salesThisYear = 0;
+    logs.forEach((log) => {
+      total += log.total;
+      if (log.clientName in clients) {
+        clients[log.clientName] += log.total;
+      } else {
+        clients[log.clientName] = log.total;
+      }
+      let date = new Date(log.date);
+      if (date.getDate() === today.getDate()) {
+        salesToday += log.total;
+      }
+
+      if (date.getMonth() === thisMonth) {
+        salesThisMonth += log.total;
+      }
+      if (date.getFullYear() === thisYear) {
+        salesThisYear += log.total;
+      }
+    });
+    let averagePerClient = 0;
+    let maxClient = "";
+    let maxSales = 0;
+    for (let client in clients) {
+      if (clients[client] > maxSales) {
+        maxSales = clients[client];
+        maxClient = client;
+      }
+      averagePerClient += clients[client];
+      console.log(averagePerClient);
+    }
+    averagePerClient = averagePerClient / Object.keys(clients).length;
+    console.log(averagePerClient);
+    res.status(200).json({
+      totalSales: total,
+      averagePerClient,
+      maxClient,
+      maxSales,
+      salesToday,
+      salesThisMonth,
+      salesThisYear,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+//get more stats like sending a list of clients and their total sales this year and this month and today
+exports.getMoreStats = async (req, res) => {
+  try {
+    const logs = await OutboundStockLog.find();
+    let today = new Date();
+    let thisMonth = today.getMonth();
+    let thisYear = today.getFullYear();
+    let clients = {};
+    logs.forEach((log) => {
+      let date = new Date(log.date);
+      if (date.getDate() === today.getDate()) {
+        if (log.clientName in clients) {
+          clients[log.clientName].today += log.total;
+        } else {
+          clients[log.clientName] = {
+            today: log.total,
+            thisMonth: 0,
+            thisYear: 0,
+            total: 0,
+          };
+        }
+      }
+
+      if (date.getMonth() === thisMonth) {
+        if (log.clientName in clients) {
+          clients[log.clientName].thisMonth += log.total;
+        } else {
+          clients[log.clientName] = {
+            today: 0,
+            thisMonth: log.total,
+            thisYear: 0,
+            total: 0,
+          };
+        }
+      }
+      if (date.getFullYear() === thisYear) {
+        if (log.clientName in clients) {
+          clients[log.clientName].thisYear += log.total;
+        } else {
+          clients[log.clientName] = {
+            today: 0,
+            thisMonth: 0,
+            thisYear: log.total,
+            total: 0,
+          };
+        }
+      }
+
+      if (log.clientName in clients) {
+        clients[log.clientName].total += log.total;
+      } else {
+        clients[log.clientName] = {
+          today: 0,
+          thisMonth: 0,
+          thisYear: 0,
+          total: log.total,
+        };
+      }
+    });
+    res.status(200).json(clients);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

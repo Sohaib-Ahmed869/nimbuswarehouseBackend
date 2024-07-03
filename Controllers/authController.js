@@ -9,9 +9,7 @@ const secretKey = process.env.JWT_SECRET;
 
 // Generate JWT
 const generateToken = (user) => {
-  return jwt.sign({ id: user._id, username: user.username }, secretKey, {
-    expiresIn: "1h",
-  });
+  return jwt.sign({ id: user._id, username: user.username }, secretKey);
 };
 
 // Signup controller
@@ -102,4 +100,3 @@ exports.cashierLogin = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
