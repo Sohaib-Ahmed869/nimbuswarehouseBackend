@@ -67,6 +67,21 @@ productSchema.methods.removeStock = async function (quantity) {
   }
 };
 
+//method to check if product is enough in stock
+productSchema.methods.checkStock = async function (quantity) {
+  try {
+    //first convert quantity to number
+    quantity = Number(quantity);
+    //first convert stock to number
+    this.stock = Number(this.stock);
+    if (this.stock < quantity) {
+      throw new Error(`Not enough stock for product ${this.name}`);
+    }
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+
 const Product = mongoose.model("Product", productSchema);
 
 module.exports = Product;

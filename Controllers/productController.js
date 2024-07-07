@@ -143,6 +143,20 @@ exports.removeOutboundProducts = async (req, res) => {
     clientName,
     total
   );
+  //first check if the products are available in stock using the checkStock method
+  for (let i = 0; i < products.length; i++) {
+    const product = await Product.findById(products[i]);
+    if (!product) {
+      return res
+        .status(404)
+        .json({ message: `Product ${productNames[i]} not found` });
+    }
+    try {
+      await product.checkStock(quantityChange[i]);
+    } catch (err) {
+      return res.status(400).json({ message: err.message });
+    }
+  }
   try {
     const log = await OutboundStockAndLog(
       products,
@@ -152,6 +166,16 @@ exports.removeOutboundProducts = async (req, res) => {
       clientName,
       total
     );
+
+    //get the products on their ids and update their stock
+    for (let i = 0; i < products.length; i++) {
+      const product = await Product.findById(products[i]);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      //call the remove stock method
+      await product.removeStock(quantityChange[i]);
+    }
 
     res.status(200).json(log);
   } catch (err) {
