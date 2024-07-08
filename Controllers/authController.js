@@ -28,6 +28,8 @@ exports.signup = async (req, res) => {
     const token = generateToken(user);
     res.status(201).json({ token });
   } catch (err) {
+    console.log("Error: ", err);
+    console.log("Request body: ", req.body);
     res.status(500).json({ message: err.message });
   }
 };
