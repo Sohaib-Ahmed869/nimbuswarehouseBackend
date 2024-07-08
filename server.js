@@ -41,8 +41,8 @@ app.use("/cashiers", cashierRoutes);
 
 // SSL options
 const options = {
-  key: fs.readFileSync('server.key'),
-  cert: fs.readFileSync('server.crt')
+  key: fs.readFileSync('/etc/letsencrypt/live/nimbus360.org/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/nimbus360.org/fullchain.pem')
 };
 
 // Create HTTPS server
