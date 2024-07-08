@@ -6,7 +6,8 @@ const clientRoutes = require("./Routes/clientRoutes");
 const warehouseRoutes = require("./Routes/warehouseRoutes");
 const emailRoutes = require("./Routes/emailRoute");
 const cashierRoutes = require("./Routes/cashierRoutes");
-
+const https = require("https");
+const fs = require("fs");
 const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
@@ -38,6 +39,13 @@ app.use("/warehouses", warehouseRoutes);
 app.use("/email", emailRoutes);
 app.use("/cashiers", cashierRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// SSL options
+const options = {
+  key: fs.readFileSync('/server.key'),
+  cert: fs.readFileSync('/server.crt')
+};
+
+// Create HTTPS server
+https.createServer(options, app).listen(PORT, () => {
+  console.log(`HTTPS Server is running on port ${PORT}`);
 });
