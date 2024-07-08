@@ -41,11 +41,13 @@ app.use("/cashiers", cashierRoutes);
 
 // SSL options
 const options = {
-  key: fs.readFileSync('../server.key'),
-  cert: fs.readFileSync('../server.crt')
+  key: fs.readFileSync('server.key'),
+  cert: fs.readFileSync('server.crt')
 };
 
 // Create HTTPS server
 https.createServer(options, app).listen(PORT, () => {
   console.log(`HTTPS Server is running on port ${PORT}`);
 });
+
+
