@@ -50,6 +50,14 @@ exports.addProduct = async (req, res) => {
   const { name, unit, stock } = req.body;
 
   try {
+    //if name already exists, return an error
+    const productExists = await Product.findOne({
+      name: name,
+    });
+    if (productExists) {
+      return res.status(400).json({ message: "Product already exists" });
+    }
+
     const product = new Product({ name, unit, stock });
     await product.save();
     res.status(201).json(product);
@@ -135,14 +143,6 @@ exports.addInboundProducts = async (req, res) => {
 exports.removeOutboundProducts = async (req, res) => {
   const { products, productNames, quantityChange, reason, clientName, total } =
     req.body;
-  console.log(
-    products,
-    productNames,
-    quantityChange,
-    reason,
-    clientName,
-    total
-  );
   //first check if the products are available in stock using the checkStock method
   for (let i = 0; i < products.length; i++) {
     const product = await Product.findById(products[i]);
@@ -239,11 +239,17 @@ exports.getStatistics = async (req, res) => {
         clients[log.clientName] = log.total;
       }
       let date = new Date(log.date);
-      if (date.getDate() === today.getDate()) {
+      console.log(date.getDate());
+      console.log(today);
+      if (
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear()
+      ) {
         salesToday += log.total;
       }
 
-      if (date.getMonth() === thisMonth) {
+      if (date.getMonth() === thisMonth && date.getFullYear() === thisYear) {
         salesThisMonth += log.total;
       }
       if (date.getFullYear() === thisYear) {
@@ -259,10 +265,8 @@ exports.getStatistics = async (req, res) => {
         maxClient = client;
       }
       averagePerClient += clients[client];
-      console.log(averagePerClient);
     }
     averagePerClient = averagePerClient / Object.keys(clients).length;
-    console.log(averagePerClient);
     res.status(200).json({
       totalSales: total,
       averagePerClient,
@@ -291,6 +295,7 @@ exports.getMoreStats = async (req, res) => {
         if (log.clientName in clients) {
           clients[log.clientName].today += log.total;
         } else {
+          console.log(clients[log.clientName]);
           clients[log.clientName] = {
             today: log.total,
             thisMonth: 0,
