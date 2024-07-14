@@ -61,10 +61,10 @@ app.use("/warehouses", warehouseRoutes);
 // };
 
 // Create HTTPS server
-// https.createServer(options, app).listen(PORT, () => {
-//   console.log(`HTTPS Server is running on port ${PORT}`);
-// });
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+https.createServer(options, app).listen(PORT, () => {
+  console.log(`HTTPS Server is running on port ${PORT}`);
 });
+
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
