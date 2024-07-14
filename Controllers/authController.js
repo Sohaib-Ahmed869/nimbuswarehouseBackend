@@ -90,7 +90,7 @@ exports.login = async (req, res) => {
 
 // cashier signup controller
 exports.cashierSignup = async (req, res) => {
-  const user = req.user;
+  const user1 = req.user;
   const { username, password } = req.body;
 
   try {
@@ -99,7 +99,7 @@ exports.cashierSignup = async (req, res) => {
       return res.status(400).json({ message: "Username already exists" });
     }
 
-    const user = new Cashier({ tenantId: user.tenantId, username, password });
+    const user = new Cashier({ tenantId: user1.tenantId, username, password });
     await user.save();
 
     res.status(201).json({ message: "Cashier created successfully" });
