@@ -99,7 +99,7 @@ exports.cashierSignup = async (req, res) => {
       return res.status(400).json({ message: "Username already exists" });
     }
 
-    const user = new Cashier({ tenantId: user.tenantId, username, password });
+    const user = new Cashier({ username, password, tenantId });
     await user.save();
 
     res.status(201).json({ message: "Cashier created successfully" });
