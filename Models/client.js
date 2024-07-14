@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const clientSchema = new Schema({
+  tenantId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    index: true,
+  },
   name: {
     type: String,
     required: true,

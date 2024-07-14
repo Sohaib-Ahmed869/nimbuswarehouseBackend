@@ -9,13 +9,15 @@ const cashierRoutes = require("./Routes/cashierRoutes");
 const https = require("https");
 // const fs = require("fs");
 const dotenv = require("dotenv");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+
 dotenv.config();
 const app = express();
-const cors = require("cors");
 
 const PORT = process.env.PORT || 3001;
 
-// Middleware to parse JSON
+app.use(cookieParser());
 app.use(express.json());
 
 // Connect to MongoDB
@@ -25,26 +27,32 @@ app.use(express.json());
 //   .catch((err) => console.log(err));
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/warehouse", {
+  // .connect("mongodb://127.0.0.1:27017/warehouse", {
+  .connect("mongodb://127.0.0.1:27017/development", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err));
+  .catch((err) => console.log("Error: ", err));
 app.use(express.json({ limit: "50mb" }));
 app.use(
   cors({
-    origin: "*",
+    origin: ["http://localhost:3000", "https://nimbus360.org"],
+    credentials: true,
   })
 );
 
+app.get("/", (req, res) => {
+  res.send("Welcome to the Warehouse Management System API");
+});
+
 // Use auth routes
 app.use("/auth", authRoutes);
-app.use("/products", productRoutes);
-app.use("/clients", clientRoutes);
-app.use("/warehouses", warehouseRoutes);
-app.use("/email", emailRoutes);
 app.use("/cashiers", cashierRoutes);
+app.use("/clients", clientRoutes);
+app.use("/email", emailRoutes);
+app.use("/products", productRoutes);
+app.use("/warehouses", warehouseRoutes);
 
 // // SSL options
 // const options = {

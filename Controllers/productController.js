@@ -3,6 +3,7 @@ const StockLog = require("../Models/stockLog");
 const OutboundStockLog = require("../Models/OutboundStockLog");
 
 const OutboundStockAndLog = async (
+  tenantId,
   products,
   productNames,
   quantityChange,
@@ -29,7 +30,9 @@ const OutboundStockAndLog = async (
     // }
 
     // Log the outbound stock
+
     const log = new OutboundStockLog({
+      tenantId,
       products,
       productNames,
       quantityChange,
@@ -47,18 +50,26 @@ const OutboundStockAndLog = async (
 
 // Add a new product
 exports.addProduct = async (req, res) => {
+  const user = req.user;
   const { name, unit, stock } = req.body;
 
   try {
     //if name already exists, return an error
     const productExists = await Product.findOne({
+      tenantId: user.tenantId,
       name: name,
     });
     if (productExists) {
       return res.status(400).json({ message: "Product already exists" });
     }
 
-    const product = new Product({ name, unit, stock });
+    const product = new Product({
+      tenantId: user.tenantId,
+      name,
+      unit,
+      stock,
+      status: "active",
+    });
     await product.save();
     res.status(201).json(product);
   } catch (err) {
@@ -68,17 +79,18 @@ exports.addProduct = async (req, res) => {
 
 // Update stock
 exports.updateStock = async (req, res) => {
+  const user = req.user;
   const { id } = req.params;
   const { quantity, reason, action } = req.body; // action can be 'add' or 'remove'
 
   try {
-    const product = await Product.findById(id);
+    const product = await Product.findOne({ _id: id, tenantId: user.tenantId });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
     if (action === "add") {
-      await product.addStock(quantity, reason);
+      await product.addStockAndLog(quantity, reason);
     } else if (action === "remove") {
       await product.removeStock(quantity, reason);
     } else {
@@ -93,8 +105,13 @@ exports.updateStock = async (req, res) => {
 
 // Get all products
 exports.getAllProducts = async (req, res) => {
+  const user = req.user;
+
   try {
-    const products = await Product.find();
+    const products = await Product.find({
+      tenantId: user.tenantId,
+      status: "active",
+    });
     res.status(200).json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -103,11 +120,12 @@ exports.getAllProducts = async (req, res) => {
 
 // Update product status
 exports.updateStatus = async (req, res) => {
+  const user = req.user;
   const { id } = req.params;
   const { status } = req.body;
 
   try {
-    const product = await Product.findById(id);
+    const product = await Product.findOne({ _id: id, tenantId: user.tenantId });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -122,11 +140,15 @@ exports.updateStatus = async (req, res) => {
 
 // Add inbound products (increase stock) and log
 exports.addInboundProducts = async (req, res) => {
+  const user = req.user;
   const { productId } = req.params; // Assuming productId is passed in the URL params
   const { quantity, reason } = req.body;
 
   try {
-    const product = await Product.findById(productId);
+    const product = await Product.findOne({
+      _id: productId,
+      tenantId: user.tenantId,
+    });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -141,11 +163,15 @@ exports.addInboundProducts = async (req, res) => {
 
 // Remove outbound products (decrease stock) and log
 exports.removeOutboundProducts = async (req, res) => {
+  const user = req.user;
   const { products, productNames, quantityChange, reason, clientName, total } =
     req.body;
   //first check if the products are available in stock using the checkStock method
   for (let i = 0; i < products.length; i++) {
-    const product = await Product.findById(products[i]);
+    const product = await Product.findOne({
+      _id: products[i],
+      tenantId: user.tenantId,
+    });
     if (!product) {
       return res
         .status(404)
@@ -158,7 +184,10 @@ exports.removeOutboundProducts = async (req, res) => {
     }
   }
   try {
+    console.log(user);
+
     const log = await OutboundStockAndLog(
+      user.tenantId,
       products,
       productNames,
       quantityChange,
@@ -169,7 +198,10 @@ exports.removeOutboundProducts = async (req, res) => {
 
     //get the products on their ids and update their stock
     for (let i = 0; i < products.length; i++) {
-      const product = await Product.findById(products[i]);
+      const product = await Product.findOne({
+        _id: products[i],
+        tenantId: user.tenantId,
+      });
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
@@ -186,8 +218,9 @@ exports.removeOutboundProducts = async (req, res) => {
 
 //get all inbound logs
 exports.getAllInboundLogs = async (req, res) => {
+  const user = req.user;
   try {
-    const logs = await StockLog.find();
+    const logs = await StockLog.find({ tenantId: user.tenantId });
     res.status(200).json(logs);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -196,8 +229,9 @@ exports.getAllInboundLogs = async (req, res) => {
 
 //get all outbound logs
 exports.getAllOutboundLogs = async (req, res) => {
+  const user = req.user;
   try {
-    const logs = await OutboundStockLog.find();
+    const logs = await OutboundStockLog.find({ tenantId: user.tenantId });
     res.status(200).json(logs);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -206,8 +240,9 @@ exports.getAllOutboundLogs = async (req, res) => {
 
 //get total sales
 exports.getTotalSales = async (req, res) => {
+  const user = req.user;
   try {
-    const logs = await OutboundStockLog.find();
+    const logs = await OutboundStockLog.find({ tenantId: user.tenantId });
     let total = 0;
     logs.forEach((log) => {
       total += log.total;
@@ -220,8 +255,9 @@ exports.getTotalSales = async (req, res) => {
 
 //get some satistics like average per client, sales this month, sales this year, sales today
 exports.getStatistics = async (req, res) => {
+  const user = req.user;
   try {
-    const logs = await OutboundStockLog.find();
+    const logs = await OutboundStockLog.find({ tenantId: user.tenantId });
     let total = 0;
     let clients = {};
     let today = new Date();
@@ -283,8 +319,9 @@ exports.getStatistics = async (req, res) => {
 
 //get more stats like sending a list of clients and their total sales this year and this month and today
 exports.getMoreStats = async (req, res) => {
+  const user = req.user;
   try {
-    const logs = await OutboundStockLog.find();
+    const logs = await OutboundStockLog.find({ tenantId: user.tenantId });
     let today = new Date();
     let thisMonth = today.getMonth();
     let thisYear = today.getFullYear();

@@ -1,22 +1,12 @@
 const Warehouse = require("../Models/warehouse");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const secretKey = process.env.JWT_SECRET;
-//send token to get warehouse
-exports.getWarehouse = async (req, res) => {
-  const token = req.header("Authorization");
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const warehouse = await Warehouse.findById(decoded.id);
-  res.status(200).json(warehouse);
-};
 
 // Update username
 exports.updateUsername = async (req, res) => {
-  const { id } = req.params;
+  const user = req.user;
   const { username } = req.body;
 
   try {
-    const warehouse = await Warehouse.findById(id);
+    const warehouse = await Warehouse.findOne({ tenantId: user.tenantId });
     if (!warehouse) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -34,16 +24,16 @@ exports.updateUsername = async (req, res) => {
 
 // Update password
 exports.updatePassword = async (req, res) => {
-  const { id } = req.params;
+  const user = req.user;
   const { password } = req.body;
 
   try {
-    const warehouse = await Warehouse.findById(id);
+    const warehouse = await Warehouse.findOne({ tenantId: user.tenantId });
     if (!warehouse) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    warehouse.updatePassword(password);
+    await warehouse.updatePassword(password);
 
     res
       .status(200)
@@ -65,7 +55,7 @@ exports.updatePassword2 = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    warehouse.updatePassword(password);
+    await warehouse.updatePassword(password);
 
     res
       .status(200)
@@ -77,11 +67,11 @@ exports.updatePassword2 = async (req, res) => {
 
 // Update branch name
 exports.updateBranchname = async (req, res) => {
-  const { id } = req.params;
+  const user = req.user;
   const { branchname } = req.body;
 
   try {
-    const warehouse = await Warehouse.findById(id);
+    const warehouse = await Warehouse.findOne({ tenantId: user.tenantId });
     if (!warehouse) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -109,9 +99,16 @@ exports.getAllWarehouses = async (req, res) => {
 
 //recieve token and return warehouse
 exports.getWarehouseById = async (req, res) => {
-  const token = req.header("Authorization");
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const user = req.user;
   //get warehouse by id
-  const warehouse = await Warehouse.findById(decoded.id);
+  console.log("TenantId: ", user.tenantId);
+  const warehouse = await Warehouse.findOne({ tenantId: user.tenantId });
+  res.status(200).json(warehouse);
+};
+
+//send token to get warehouse
+exports.getWarehouse = async (req, res) => {
+  const user = req.user;
+  const warehouse = await Warehouse.findOne({ tenantId: user.tenantId });
   res.status(200).json(warehouse);
 };

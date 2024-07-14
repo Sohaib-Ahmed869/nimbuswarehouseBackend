@@ -3,6 +3,11 @@ const bcrypt = require("bcryptjs");
 const Schema = mongoose.Schema;
 
 const cashierSchema = new Schema({
+  tenantId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    index: true,
+  },
   username: {
     type: String,
     required: true,
@@ -12,11 +17,11 @@ const cashierSchema = new Schema({
     type: String,
     required: true,
   },
-  warehouseOwner: {
-    type: Schema.Types.ObjectId,
-    ref: "Warehouse",
-    required: true,
-  },
+  // warehouseOwner: {
+  //   type: Schema.Types.ObjectId,
+  //   ref: "Warehouse",
+  //   required: true,
+  // },
 });
 
 // Hash password before saving

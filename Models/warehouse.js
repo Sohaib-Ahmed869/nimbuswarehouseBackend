@@ -10,6 +10,11 @@ const oneMonthFromNow = () => {
 
 // Define the User schema
 const warehouseSchema = new Schema({
+  tenantId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    unique: true,
+  },
   email: {
     type: String,
     required: true,
@@ -48,14 +53,20 @@ warehouseSchema.pre("save", async function (next) {
     return next();
   }
   const salt = await bcrypt.genSalt();
-  this.password = await bcrypt.hash(this.password, salt);
+  await bcrypt.hash(this.password, salt).then((hash) => {
+    console.log("Hash: ", hash);
+    this.password = hash;
+  });
+  console.log("Hashed Password: ", this.password);
   next();
 });
 
 //update password
 warehouseSchema.methods.updatePassword = async function (password) {
   this.password = password;
+  console.log("Password: ", this.password);
   await this.save();
+  console.log("Password after saving: ", this.password);
 };
 
 // Compare passwords

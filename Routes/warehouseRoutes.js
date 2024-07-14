@@ -9,12 +9,15 @@ const {
   updatePassword2
 } = require("../Controllers/warehouseController");
 
+const { verifyToken, verifyAdmin } = require("../Middlewares/auth");
+
 const router = express.Router();
 
-router.put("/update-username/:id", updateUsername);
-router.put("/update-password/:id", updatePassword);
-router.put("/update-password2", updatePassword2);
-router.put("/update-branchname/:id", updateBranchname);
+router.use(verifyToken);
+router.put("/update-username", verifyAdmin, updateUsername);
+router.put("/update-password", verifyAdmin, updatePassword);
+router.put("/update-password2", verifyAdmin, updatePassword2);
+router.put("/update-branchname", verifyAdmin, updateBranchname);
 router.get("/", getAllWarehouses);
 router.get("/get-warehouse", getWarehouseById);
 router.get("/warehouse", getWarehouse);

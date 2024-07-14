@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const outboundstockLogSchema = new Schema({
+  tenantId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    index: true,
+  },
   products: {
     type: Array,
     required: true,

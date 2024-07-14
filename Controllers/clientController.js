@@ -2,10 +2,16 @@ const Client = require("../Models/client");
 
 // Add a new client
 exports.addClient = async (req, res) => {
+  const user = req.user;
   const { name, address, phone } = req.body;
 
   try {
-    const client = new Client({ name, address, phone });
+    const client = new Client({
+      tenantId: user.tenantId,
+      name,
+      address,
+      phone,
+    });
     await client.save();
     res.status(201).json(client);
   } catch (err) {
@@ -15,11 +21,12 @@ exports.addClient = async (req, res) => {
 
 // Update an existing client
 exports.updateClient = async (req, res) => {
+  const user = req.user;
   const { id } = req.params;
   const { name, address, phone } = req.body;
 
   try {
-    const client = await Client.findById(id);
+    const client = await Client.findOne({ _id: id, tenantId: user.tenantId });
     if (!client) {
       return res.status(404).json({ message: "Client not found" });
     }
@@ -37,11 +44,12 @@ exports.updateClient = async (req, res) => {
 };
 
 exports.addProductRates = async (req, res) => {
+  const user = req.user;
   const { id } = req.params;
   const { productId, rate } = req.body;
 
   try {
-    const client = await Client.findById(id);
+    const client = await Client.findOne({ _id: id, tenantId: user.tenantId });
     if (!client) {
       return res.status(404).json({ message: "Client not found" });
     }
@@ -55,11 +63,12 @@ exports.addProductRates = async (req, res) => {
 };
 
 exports.updateProductRates = async (req, res) => {
+  const user = req.user;
   const { id } = req.params;
   const { productId, rate } = req.body;
 
   try {
-    const client = await Client.findById(id);
+    const client = await Client.findOne({ _id: id, tenantId: user.tenantId });
     if (!client) {
       return res.status(404).json({ message: "Client not found" });
     }
@@ -78,7 +87,11 @@ exports.updateProductRates = async (req, res) => {
     console.log(client);
 
     await Client.findOneAndUpdate(
-      { _id: id, "product_rates.productId": productId },
+      {
+        _id: id,
+        tenantId: user.tenantId,
+        "product_rates.productId": productId,
+      },
       { $set: { "product_rates.$.rate": rate } }
     );
 
@@ -89,8 +102,9 @@ exports.updateProductRates = async (req, res) => {
 };
 
 exports.getAllClients = async (req, res) => {
+  const user = req.user;
   try {
-    const clients = await Client.find();
+    const clients = await Client.find({ tenantId: user.tenantId });
     res.status(200).json(clients);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -98,10 +112,11 @@ exports.getAllClients = async (req, res) => {
 };
 
 exports.getClient = async (req, res) => {
+  const user = req.user;
   const { id } = req.params;
 
   try {
-    const client = await Client.findById(id);
+    const client = await Client.findOne({ _id: id, tenantId: user.tenantId });
     if (!client) {
       return res.status(404).json({ message: "Client not found" });
     }
@@ -113,10 +128,11 @@ exports.getClient = async (req, res) => {
 };
 
 exports.getClientRates = async (req, res) => {
+  const user = req.user;
   const { id } = req.params;
 
   try {
-    const client = await Client.findById(id);
+    const client = await Client.findOne({ _id: id, tenantId: user.tenantId });
     if (!client) {
       return res.status(404).json({ message: "Client not found" });
     }

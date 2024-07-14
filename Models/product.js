@@ -4,6 +4,11 @@ const StockLog = require("./stockLog");
 const outboundStockLog = require("./OutboundStockLog");
 
 const productSchema = new Schema({
+  tenantId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    index: true,
+  },
   name: {
     type: String,
     required: true,
@@ -34,6 +39,7 @@ productSchema.methods.addStockAndLog = async function (quantity, reason) {
     await this.save();
 
     const log = new StockLog({
+      tenantId: this.tenantId,
       product: this._id,
       productName: this.name,
       quantityChange: quantity,
