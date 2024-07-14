@@ -92,7 +92,7 @@ exports.login = async (req, res) => {
 exports.cashierSignup = async (req, res) => {
   const user1 = req.user;
   const { username, password } = req.body;
-
+  const tenantId = user.tenantId;
   try {
     const existingUser = await Cashier.findOne({ username: username });
     if (existingUser) {
