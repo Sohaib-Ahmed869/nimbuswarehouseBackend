@@ -22,9 +22,7 @@ app.use(express.json());
 
 // Connect to MongoDB
 mongoose
-  .connect(
-    "mongodb+srv://hexlertech:vQEmfMxnymZ510vo@cluster0.gyfkxge.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-  )
+  .connect("mongodb+srv://hexlertech:vQEmfMxnymZ510vo@cluster0.gyfkxge.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log(err));
 
@@ -58,8 +56,8 @@ app.use("/warehouses", warehouseRoutes);
 
 // // SSL options
 const options = {
-  key: fs.readFileSync("/etc/letsencrypt/live/nimbus360.org/privkey.pem"),
-  cert: fs.readFileSync("/etc/letsencrypt/live/nimbus360.org/fullchain.pem"),
+  key: fs.readFileSync('/etc/letsencrypt/live/nimbus360.org/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/nimbus360.org/fullchain.pem')
 };
 
 // Create HTTPS server
