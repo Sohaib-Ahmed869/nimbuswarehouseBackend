@@ -21,7 +21,7 @@ const outboundstockLogSchema = new Schema({
   },
   date: {
     type: Date,
-    default: Date('2024-09-25T10:00:00.000Z')
+    default: new Date(),
   },
   reason: {
     type: String,

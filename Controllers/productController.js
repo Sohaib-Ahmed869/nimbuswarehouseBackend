@@ -1,6 +1,7 @@
 const Product = require("../Models/product");
 const StockLog = require("../Models/stockLog");
 const OutboundStockLog = require("../Models/OutboundStockLog");
+const moment = require("moment-timezone");
 
 const OutboundStockAndLog = async (
   tenantId,
@@ -112,6 +113,7 @@ exports.getAllProducts = async (req, res) => {
       tenantId: user.tenantId,
       status: "active",
     });
+
     res.status(200).json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -219,8 +221,16 @@ exports.removeOutboundProducts = async (req, res) => {
 //get all inbound logs
 exports.getAllInboundLogs = async (req, res) => {
   const user = req.user;
+  const timezone = req.query.timezone;
   try {
     const logs = await StockLog.find({ tenantId: user.tenantId });
+
+    logs.forEach((log) => {
+      console.log("Old date:", log.date);
+      log.date = moment(log.date).tz(timezone).format();
+      console.log("New date:", log.date);
+    });
+
     res.status(200).json(logs);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -230,8 +240,16 @@ exports.getAllInboundLogs = async (req, res) => {
 //get all outbound logs
 exports.getAllOutboundLogs = async (req, res) => {
   const user = req.user;
+  const userTimeZone = req.query.timezone;
   try {
     const logs = await OutboundStockLog.find({ tenantId: user.tenantId });
+
+    logs.forEach((log) => {
+      console.log("Old date:", log.date);
+      log.date = moment(log.date).tz(userTimeZone).format();
+      console.log("New date:", log.date);
+    });
+
     res.status(200).json(logs);
   } catch (err) {
     res.status(500).json({ message: err.message });
