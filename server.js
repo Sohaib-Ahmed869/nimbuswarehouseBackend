@@ -34,13 +34,15 @@ mongoose
 //   })
 //   .then(() => console.log("MongoDB connected"))
 //   .catch((err) => console.log("Error: ", err));
-// app.use(express.json({ limit: "50mb" }));
-// app.use(
-//   cors({
-//     origin: ["http://localhost:3000", "https://nimbus360.org"],
-//     credentials: true,
-//   })
-// );
+
+
+app.use(express.json({ limit: "50mb" }));
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://nimbus360.org"],
+    credentials: true,
+  })
+);
 
 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 console.log("timezone: ", timezone);
