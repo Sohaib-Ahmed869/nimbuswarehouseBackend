@@ -1,4 +1,5 @@
 const Warehouse = require("../Models/warehouse");
+const moment = require("moment-timezone");
 
 // Update username
 exports.updateUsername = async (req, res) => {
@@ -87,6 +88,28 @@ exports.updateBranchname = async (req, res) => {
   }
 };
 
+// update rent paid status
+exports.updateStatus = async (req, res) => {
+  const user = req.user;
+  const { rent_paid } = req.body;
+
+  try {
+    const warehouse = await Warehouse.findOne({ tenantId: user.tenantId });
+    if (!warehouse) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    warehouse.rent_paid = rent_paid;
+    await warehouse.save();
+
+    res
+      .status(200)
+      .json({ message: "Rent status updated successfully", warehouse });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 //get warehouse all warehouses
 exports.getAllWarehouses = async (req, res) => {
   try {
@@ -109,6 +132,10 @@ exports.getWarehouseById = async (req, res) => {
 //send token to get warehouse
 exports.getWarehouse = async (req, res) => {
   const user = req.user;
+  const timezone = req.query.timezone;
   const warehouse = await Warehouse.findOne({ tenantId: user.tenantId });
+
+  warehouse.rent_due = moment(warehouse.rent_due).tz(timezone).format();
+
   res.status(200).json(warehouse);
 };

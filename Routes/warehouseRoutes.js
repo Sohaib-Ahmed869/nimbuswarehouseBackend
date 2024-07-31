@@ -3,6 +3,7 @@ const {
   updateUsername,
   updatePassword,
   updateBranchname,
+  updateStatus,
   getAllWarehouses,
   getWarehouseById,
   getWarehouse,
@@ -18,6 +19,7 @@ router.put("/update-username", verifyAdmin, updateUsername);
 router.put("/update-password", verifyAdmin, updatePassword);
 router.put("/update-password2", verifyAdmin, updatePassword2);
 router.put("/update-branchname", verifyAdmin, updateBranchname);
+router.put("/update-status", verifyAdmin, updateStatus);
 router.get("/", getAllWarehouses);
 router.get("/get-warehouse", getWarehouseById);
 router.get("/warehouse", getWarehouse);

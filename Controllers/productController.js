@@ -145,6 +145,8 @@ exports.addInboundProducts = async (req, res) => {
   const user = req.user;
   const { productId } = req.params; // Assuming productId is passed in the URL params
   const { quantity, reason } = req.body;
+  console.log("date: ", new Date());
+  console.log("moment date: ", moment().format("LTS"));
 
   try {
     const product = await Product.findOne({
@@ -226,9 +228,10 @@ exports.getAllInboundLogs = async (req, res) => {
     const logs = await StockLog.find({ tenantId: user.tenantId });
 
     logs.forEach((log) => {
-      console.log("Old date:", log.date);
-      log.date = moment(log.date).tz(timezone).format();
-      console.log("New date:", log.date);
+      var logDate = new Date(log.date);
+      var local = moment(logDate).tz(timezone);
+      var localDate = local.utc(true).toDate();
+      log.date = new Date(localDate);
     });
 
     res.status(200).json(logs);
@@ -240,14 +243,15 @@ exports.getAllInboundLogs = async (req, res) => {
 //get all outbound logs
 exports.getAllOutboundLogs = async (req, res) => {
   const user = req.user;
-  const userTimeZone = req.query.timezone;
+  const timezone = req.query.timezone;
   try {
     const logs = await OutboundStockLog.find({ tenantId: user.tenantId });
 
     logs.forEach((log) => {
-      console.log("Old date:", log.date);
-      log.date = moment(log.date).tz(userTimeZone).format();
-      console.log("New date:", log.date);
+      var logDate = new Date(log.date);
+      var local = moment(logDate).tz(timezone);
+      var localDate = local.utc(true).toDate();
+      log.date = new Date(localDate);
     });
 
     res.status(200).json(logs);

@@ -20,7 +20,7 @@ const generateToken = (user, role) => {
       tenantId: user.tenantId,
       username: user.username,
       role: role,
-      timestamp: new Date().getTime(),
+      timestamp: Date.now(),
     },
     secretKey
   );

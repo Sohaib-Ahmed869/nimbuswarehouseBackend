@@ -22,7 +22,7 @@ const stockLogSchema = new Schema({
     },
     date: {
         type: Date,
-        default: new Date(),
+        default: Date.now,
     },
     reason: {
         type: String,
